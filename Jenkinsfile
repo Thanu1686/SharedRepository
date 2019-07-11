@@ -12,6 +12,10 @@ node(label: 'master'){
     def goal = "clean install"
     def lastSuccessfulBuildID = 0
     def project_path = "spring-boot-samples/spring-boot-sample-atmosphere"
+    def artifactoryServer = "Artifactory"
+    def releaseRepo = "generic-local"
+    def snapshotRepo = "generic-snapshot"
+  
     //Check for Previous-Successful-Build
     stage('Get Last Successful Build Number'){
         def build = currentBuild.previousBuild
@@ -30,9 +34,19 @@ node(label: 'master'){
         gitClone "${gitURL}","${repoBranch}"    
     }
     dir(project_path){
-    //Sonarqube Analysis
-    stage('Sonarqube-scan'){
-        sonarqubeScan "${mvnHome}","${sonarqubeGoal}","${pom}", "${sonarqubeServer}"
-    }
+        //Sonarqube Analysis
+        stage('Sonarqube-scan'){
+            sonarqubeScan "${mvnHome}","${sonarqubeGoal}","${pom}", "${sonarqubeServer}"
+        }
+
+        //Quality-gate
+        stage('Quality-Gate'){
+            qualityGate "${sonarqubeServer}"
+        }
+
+        //MVN Build
+        stage('Maven Build and Push to Artifactory'){
+            mavenBuild "${artifactoryServer}","${mvnHome}","${pom}", "${goal}", "${releaseRepo}", "${snapshotRepo}"
+        }
    }    
 }

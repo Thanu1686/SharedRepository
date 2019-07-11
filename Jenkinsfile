@@ -2,16 +2,16 @@
 
 node(label: 'master'){
     //Variables
-    def gitURL = "https://github.com/AbhishekSuvarna/game-of-life.git "
+    def gitURL = "https://github.com/Thanu1686/Jenkins2.git"
     def repoBranch = "master"
-    def applicationName = "game-of-life"
+    def applicationName = "atmosphere"
     def sonarqubeServer = "sonar"
     def sonarqubeGoal = "clean verify sonar:sonar"
     def mvnHome = "MAVEN_HOME"
     def pom = "pom.xml"
     def goal = "clean install"
     def lastSuccessfulBuildID = 0
-    
+    def project_path = "spring-boot-samples/spring-boot-sample-atmosphere"
     //Check for Previous-Successful-Build
     stage('Get Last Successful Build Number'){
         def build = currentBuild.previousBuild
@@ -29,10 +29,10 @@ node(label: 'master'){
     stage('Git-Checkout'){
         gitClone "${gitURL}","${repoBranch}"    
     }
-    
+    dir(project_path){
     //Sonarqube Analysis
     stage('Sonarqube-scan'){
         sonarqubeScan "${mvnHome}","${sonarqubeGoal}","${pom}", "${sonarqubeServer}"
     }
-       
+   }    
 }

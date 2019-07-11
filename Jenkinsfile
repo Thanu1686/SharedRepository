@@ -1,4 +1,7 @@
-@Library('shared-library') _
+libraries {
+  lib('project_devops@master')
+}
+
 node(label: 'master'){
     //Variables
     def gitURL = "https://github.com/AbhishekSuvarna/game-of-life.git "

@@ -1,6 +1,4 @@
-libraries {
-  lib('project_devops@master')
-}
+@Library('project_devops')_
 
 node(label: 'master'){
     //Variables

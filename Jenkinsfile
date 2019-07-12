@@ -22,7 +22,6 @@ node(label: 'master'){
     def dockerImageName = "${dockerRegistryUserName}/${applicationName}"
     def vmPort = 9999
     def containerPort = 8080
-    def lastSuccessfulBuildID = 0
   
     //Check for Previous-Successful-Build
     stage('Get Last Successful Build Number'){

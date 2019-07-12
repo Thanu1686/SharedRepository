@@ -15,6 +15,14 @@ node(label: 'master'){
     def artifactoryServer = "Artifactory"
     def releaseRepo = "generic-local"
     def snapshotRepo = "generic-snapshot"
+    def dockerRegistry = "https://registry.hub.docker.com"
+    def dockerImageRemove = "registry.hub.docker.com"
+    def dockerRegistryUserName = "thanu1686"
+    def dockerCredentialID = "dockerID" 
+    def dockerImageName = "${dockerRegistryUserName}/${applicationName}"
+    def vmPort = 9999
+    def containerPort = 8080
+    def lastSuccessfulBuildID = 0
   
     //Check for Previous-Successful-Build
     stage('Get Last Successful Build Number'){
@@ -48,5 +56,26 @@ node(label: 'master'){
         stage('Maven Build and Push to Artifactory'){
             mavenBuild "${artifactoryServer}","${mvnHome}","${pom}", "${goal}", "${releaseRepo}", "${snapshotRepo}"
         }
+        
+        //docker-image-build and Push
+    stage('Build Docker image and Push'){
+        dockerBuildAndPush "${dockerRegistry}","${dockerCredentialID}","${dockerImageName}"
+    }
+    
+    //Remove extra image
+    stage('Remove image'){
+        removeDockerImage "${dockerImageRemove}","${dockerImageName}","${dockerRegistryUserName}","${applicationName}","${lastSuccessfulBuildID}"
+    }
+    
+    //Download Docker Image
+    stage('Download Docker Image'){
+        downloadDockerImage "${dockerImageName}", "${BUILD_NUMBER}"
+    }
+    
+    //Delete Old running Container and run new built
+    stage('Run Docker Image'){
+        echo "Last Successful Build = ${lastSuccessfulBuildID}"
+        runDockerImage "${vmPort}","${containerPort}", "${applicationName}","${dockerImageName}", "${BUILD_NUMBER}", "${lastSuccessfulBuildID}"
+    }
    }    
 }
